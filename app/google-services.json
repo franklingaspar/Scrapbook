@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "842016955345",
+    "firebase_url": "https://scrapbook-40ab0.firebaseio.com",
+    "project_id": "scrapbook-40ab0",
+    "storage_bucket": "scrapbook-40ab0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:842016955345:android:c02195b427d4c41b",
+        "android_client_info": {
+          "package_name": "com.fgr.scrapbook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "842016955345-1r2vt8fl6l6dkd6hmi3li05j85vd87fn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fgr.scrapbook",
+            "certificate_hash": "4caea33b182fe81ab22b21e76c02f32d21302832"
+          }
+        },
+        {
+          "client_id": "842016955345-b785a5t6boin8s45t1j45aos2aml5h98.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAurd8ntkhfoODbpl4KF1oGuHGsCoHg80M"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "842016955345-b785a5t6boin8s45t1j45aos2aml5h98.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
