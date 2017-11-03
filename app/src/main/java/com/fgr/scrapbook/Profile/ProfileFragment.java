@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -23,6 +24,7 @@ import com.fgr.scrapbook.Utils.BottomNavigationViewHelper;
 import com.fgr.scrapbook.Utils.FirebaseMethods;
 import com.fgr.scrapbook.Utils.GridImageAdapter;
 import com.fgr.scrapbook.Utils.UniversalImageLoader;
+import com.fgr.scrapbook.models.Like;
 import com.fgr.scrapbook.models.Photo;
 import com.fgr.scrapbook.models.UserAccountSettings;
 import com.fgr.scrapbook.models.UserSettings;
@@ -37,6 +39,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -47,6 +52,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ProfileFragment extends Fragment {
 
     private static final String TAG = "ProfileFragment";
+
+
+    public interface OnGridImageSelectedListener{
+        void onGridImageSelected(Photo photo, int activityNumber);
+    }
+    OnGridImageSelectedListener mOnGridImageSelectedListener;
 
     private static final int ACTIVITY_NUM = 4;
     private static final int NUM_GRID_COLUMNS = 3;
@@ -108,10 +119,21 @@ public class ProfileFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), AccountSettingsActivity.class);
                 intent.putExtra(getString(R.string.calling_activity), getString(R.string.profile_activity));
                 startActivity(intent);
+                getActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
 
         return view;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        try{
+            mOnGridImageSelectedListener = (OnGridImageSelectedListener) getActivity();
+        }catch (ClassCastException e){
+            Log.e(TAG, "onAttach: ClassCastException: " + e.getMessage() );
+        }
+        super.onAttach(context);
     }
 
     private void setupGridView(){
@@ -126,7 +148,26 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for ( DataSnapshot singleSnapshot :  dataSnapshot.getChildren()){
-                    photos.add(singleSnapshot.getValue(Photo.class));
+
+                    Photo photo = new Photo();
+                    Map<String, Object> objectMap = (HashMap<String, Object>) singleSnapshot.getValue();
+
+                    photo.setCaption(objectMap.get(getString(R.string.field_caption)).toString());
+                    photo.setTags(objectMap.get(getString(R.string.field_tags)).toString());
+                    photo.setPhoto_id(objectMap.get(getString(R.string.field_photo_id)).toString());
+                    photo.setUser_id(objectMap.get(getString(R.string.field_user_id)).toString());
+                    photo.setDate_created(objectMap.get(getString(R.string.field_date_created)).toString());
+                    photo.setImage_path(objectMap.get(getString(R.string.field_image_path)).toString());
+
+                    List<Like> likesList = new ArrayList<Like>();
+                    for (DataSnapshot dSnapshot : singleSnapshot
+                            .child(getString(R.string.field_likes)).getChildren()){
+                        Like like = new Like();
+                        like.setUser_id(dSnapshot.getValue(Like.class).getUser_id());
+                        likesList.add(like);
+                    }
+                    photo.setLikes(likesList);
+                    photos.add(photo);
                 }
                 //setup our image grid
                 int gridWidth = getResources().getDisplayMetrics().widthPixels;
@@ -140,6 +181,13 @@ public class ProfileFragment extends Fragment {
                 GridImageAdapter adapter = new GridImageAdapter(getActivity(),R.layout.layout_grid_imageview,
                         "", imgUrls);
                 gridView.setAdapter(adapter);
+
+                gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        mOnGridImageSelectedListener.onGridImageSelected(photos.get(position), ACTIVITY_NUM);
+                    }
+                });
             }
 
             @Override
@@ -184,6 +232,7 @@ public class ProfileFragment extends Fragment {
                 Log.d(TAG, "onClick: navigating to account settings.");
                 Intent intent = new Intent(mContext, AccountSettingsActivity.class);
                 startActivity(intent);
+                getActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
     }
@@ -194,7 +243,7 @@ public class ProfileFragment extends Fragment {
     private void setupBottomNavigationView(){
         Log.d(TAG, "setupBottomNavigationView: setting up BottomNavigationView");
         BottomNavigationViewHelper.setupBottomNavigationView(bottomNavigationView);
-        BottomNavigationViewHelper.enableNavigation(mContext, bottomNavigationView);
+        BottomNavigationViewHelper.enableNavigation(mContext,getActivity() ,bottomNavigationView);
         Menu menu = bottomNavigationView.getMenu();
         MenuItem menuItem = menu.getItem(ACTIVITY_NUM);
         menuItem.setChecked(true);
