@@ -619,4 +619,3 @@ public class ViewPostFragment extends Fragment {
 
 
 
-
